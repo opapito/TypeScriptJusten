@@ -2,7 +2,7 @@
 //@Selector
 //@useState("dasdas")
 
-// Class decorator
+// Class decorator////////////////////////////////////////////////////////////////////////////////////
 function setAPIVersion(apiVersion: string){
   return (constructor) => {           
     return class extends constructor{
@@ -15,7 +15,7 @@ function setAPIVersion(apiVersion: string){
 class API{}
 console.log(new API());
 
-// Property decorator
+// Property decorator //////////////////////////////////////////////////////////////////////////////////
 function minLength(length: number){
   return (target: any, key: string ) => { // "target" is the prototype of the class, the second parameter passed: "key" is the name of the property we are working in
     let val = target[key];
@@ -23,7 +23,7 @@ function minLength(length: number){
     const getter = () => val;
     const setter = (value: string) =>{
       if (value.length < length){
-        console.log(`Error; você não pode criar ${key} menor que ${length}.`);
+        console.log(`Error: você não pode criar ${key} menor que ${length}.`);
       } else{
         val = value;
       }
@@ -37,8 +37,6 @@ function minLength(length: number){
 
 }
 
-
-
 class Movie {
   // validation - if < 5 letters - error
   @minLength(50)
@@ -51,10 +49,46 @@ const movie = new Movie("Interstellar");
 console.log(movie.title);
 
 // Method decorator
-// Parameter decorator
-// Acessor decorator
+function delay(ms: number) {
+  return (target: any, key: string, descriptor: PropertyDescriptor) => {
+    const originalMethod = descriptor.value;
 
-// Before use decorators, it is necessary to set "experimentalDecorators": true in the tsconfig.json file
+    descriptor.value = function(...args) {
+        console.log(`Esperando ${ms} milliseconds...`);
+        setTimeout(()=>{
+          originalMethod.apply(this, args)
+        }, ms);
+        return descriptor;
+    }
+/*     console.log("target ->", target);
+    console.log("key -> ", key);
+    console.log("descritptor -> ", descriptor); */
+  };
+}
+
+class Greeter {
+  greeting: string;
+
+  constructor(g: string){
+    this.greeting = g;
+  }
+  // decorator to wait a time and then it will run the method
+  @delay(1000)
+  greet() {
+    console.log(`Hello! ${this.greeting}`);
+  }
+}
+
+const people1 = new Greeter("My friend!");
+people1.greet();
+
+// Parameter decorator
+
+
+// Acessor decorator//////////////////////////////////////////////////////////////////////////////////
+
+// Before use decorators, it is necessary to set "experimentalDecorators": true, and set the "target":"ES2017" in the tsconfig.json file
+// Also it is possible to run typescript with the following command: tsc --target es2017 decorators.ts --watch
 
 // Factory
 function Logger(prefix: string){
